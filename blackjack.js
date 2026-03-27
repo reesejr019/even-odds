@@ -94,18 +94,34 @@ function makeCardEl(card, faceDown = false) {
 }
 
 function renderHands(dealerHidden) {
-  // Dealer
-  bjEl.dealerCards.innerHTML = '';
+  // ── Dealer ─────────────────────────────────────────────────
+  // Only touch cards that changed so existing ones don't re-animate.
+  const existingDealerEls = Array.from(bjEl.dealerCards.children);
   bj.dealer.forEach((card, i) => {
-    bjEl.dealerCards.appendChild(makeCardEl(card, dealerHidden && i === 0));
+    const existing = existingDealerEls[i];
+    if (!existing) {
+      // New card — append with deal animation
+      bjEl.dealerCards.appendChild(makeCardEl(card, dealerHidden && i === 0));
+    } else if (!dealerHidden && existing.classList.contains('face-down')) {
+      // Hole card being revealed — swap face-down for face-up (animates once)
+      bjEl.dealerCards.replaceChild(makeCardEl(card, false), existing);
+    }
+    // Already rendered and no state change — leave it alone
   });
+
   bjEl.dealerLabel.textContent = dealerHidden
     ? 'Dealer — ?'
     : `Dealer — ${handTotal(bj.dealer)}`;
 
-  // Player
-  bjEl.playerCards.innerHTML = '';
-  bj.player.forEach(card => bjEl.playerCards.appendChild(makeCardEl(card)));
+  // ── Player ─────────────────────────────────────────────────
+  // Only append cards that aren't in the DOM yet
+  const renderedPlayerCount = bjEl.playerCards.children.length;
+  bj.player.forEach((card, i) => {
+    if (i >= renderedPlayerCount) {
+      bjEl.playerCards.appendChild(makeCardEl(card));
+    }
+  });
+
   bjEl.playerLabel.textContent = `You — ${handTotal(bj.player)}`;
 }
 
