@@ -1,0 +1,98 @@
+Introduction (100 Words)
+
+Even Odds is a simple dice-based game designed to teach players about risk and decision-making. Players begin with a set amount of virtual currency and must bet on five rounds of dice rolls. Two dice are rolled each round, and if the total is even the player wins the bet. If the total is odd, the player loses the bet. The game focuses on the emotional experience of gambling, including excitement, tension, and regret. Its core values are risk awareness, reflection, and responsibility. By experiencing wins and losses firsthand, players learn how easy it is to take bigger risks and how quickly small decisions can affect long-term outcomes.
+
+Design Pillars
+Visible Risk, Visible Consequence
+
+Every bet directly affects the player’s money, helping them clearly see the results of their decisions.
+
+Emotional Tension Through Simplicity
+
+The rules are simple so players focus on anticipation and the emotional impact of winning or losing.
+
+Temptation vs Self-Control
+
+Players must choose between playing safely or taking larger risks such as doubling their bet.
+
+Reflection Over Reward
+
+The game encourages players to think about their choices instead of just trying to win repeatedly.
+
+Concept
+
+Even Odds is a short gambling-style dice game where players bet money on dice rolls. The goal is to end the game with more money than they started with while understanding the risks involved in betting.
+
+Genre
+
+Educational / Serious Game
+Risk Simulation
+
+Setting
+
+The game takes place in a minimal casino-style environment with a simple table where players roll dice and place bets. The setting is not meant to glamorize gambling but to simulate the experience in a controlled way.
+
+Target Audience
+
+Young adults and college students who are beginning to encounter gambling systems such as sports betting or online casinos. The game is designed to help them better understand risk and probability.
+
+Look & Feel
+Art Style
+
+The art style will be minimalist with a casino-inspired look.
+
+Mood
+
+Tense but reflective.
+
+Color Palette
+
+Dark background colors with contrasting highlights:
+
+Deep green or dark blue table
+White dice
+Gold or yellow highlights for wins
+Red highlights for losses
+Narrative / Theme
+
+The game does not have a traditional story. Instead, the narrative is the emotional journey of the player as they experience wins, losses, and decision-making under risk.
+
+Theme: Risk, temptation, and consequence
+
+Technical Aspects
+
+Game components include:
+
+Two six-sided dice
+Player currency tracker
+Betting interface
+Score display
+Result screen
+End-of-game summary screen
+
+If developed digitally, it will use:
+
+HTML
+CSS
+JavaScript
+Player Objectives
+
+The objective is to finish the game with more money than you started with.
+
+Win Condition:
+
+End the five rounds with a positive balance.
+
+Lose Condition:
+
+Finish the game with less money than you started.
+Mechanics / Rules
+The player begins with a fixed amount of money (example: 100 credits).
+The game lasts until the player runs out of money.
+Before each round, the player chooses how much to bet.
+Two dice are rolled.
+If the total is even, the player wins the bet amount.
+If the total is odd, the player loses the bet amount.
+The player’s balance is updated after each round.
+The player may choose a “double-or-nothing” option in the final round.
+After five rounds, the game ends and the player sees a summary of their choices.

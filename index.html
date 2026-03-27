@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Even Odds</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- START SCREEN -->
+  <div id="screen-start" class="screen active">
+    <div class="card">
+      <h1>Even Odds</h1>
+      <p class="subtitle">A dice game about risk and consequence.</p>
+      <p class="rules-summary">
+        You start with <strong>100 credits</strong>.<br/>
+        Each round, bet any amount, then roll two dice.<br/>
+        <span class="win-text">Even total → you win your bet.</span><br/>
+        <span class="lose-text">Odd total → you lose your bet.</span><br/>
+        The game ends after <strong>5 rounds</strong> or when you're broke.
+      </p>
+      <button id="btn-start" class="btn-primary">Start Game</button>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="screen-game" class="screen">
+    <div class="hud">
+      <div class="hud-item">
+        <span class="hud-label">Balance</span>
+        <span id="balance" class="hud-value">100</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Round</span>
+        <span id="round-display" class="hud-value">1 / 5</span>
+      </div>
+    </div>
+
+    <div class="table">
+      <!-- Dice area -->
+      <div id="dice-area" class="dice-area">
+        <div class="die" id="die1">?</div>
+        <div class="die" id="die2">?</div>
+      </div>
+
+      <div id="roll-result" class="roll-result"></div>
+
+      <!-- Betting controls -->
+      <div id="betting-area" class="betting-area">
+        <p class="bet-prompt">Place your bet:</p>
+        <div class="bet-chips">
+          <button class="chip" data-amount="5">5</button>
+          <button class="chip" data-amount="10">10</button>
+          <button class="chip" data-amount="25">25</button>
+          <button class="chip" data-amount="50">50</button>
+          <button class="chip chip-all" data-amount="all">ALL IN</button>
+        </div>
+        <div class="bet-input-row">
+          <label for="bet-input">Custom:</label>
+          <input id="bet-input" type="number" min="1" placeholder="0" />
+        </div>
+        <p class="bet-selected">Bet: <span id="bet-display">—</span></p>
+
+        <!-- Double-or-nothing (shown only on round 5) -->
+        <div id="double-option" class="double-option hidden">
+          <p class="double-label">Final round — go <strong>double or nothing</strong>?</p>
+          <label class="toggle-label">
+            <input type="checkbox" id="double-toggle" />
+            Double the stakes
+          </label>
+        </div>
+
+        <button id="btn-roll" class="btn-primary" disabled>Roll Dice</button>
+      </div>
+
+      <!-- Continue button (shown after result) -->
+      <button id="btn-next" class="btn-secondary hidden">Next Round</button>
+    </div>
+  </div>
+
+  <!-- SUMMARY SCREEN -->
+  <div id="screen-summary" class="screen">
+    <div class="card">
+      <h2 id="summary-title">Game Over</h2>
+      <p id="summary-verdict" class="verdict"></p>
+      <div class="summary-stats">
+        <div class="stat">
+          <span class="stat-label">Started with</span>
+          <span class="stat-value">100 credits</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Ended with</span>
+          <span id="final-balance" class="stat-value">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Net result</span>
+          <span id="net-result" class="stat-value">—</span>
+        </div>
+      </div>
+      <div id="round-history" class="round-history"></div>
+      <button id="btn-restart" class="btn-primary">Play Again</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
