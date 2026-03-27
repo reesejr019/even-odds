@@ -320,3 +320,208 @@ h2 { font-size: 2rem; color: var(--gold); margin-bottom: 0.75rem; }
 
 /* ── Utility ──────────────────────────────────────────────── */
 .hidden { display: none !important; }
+
+/* ── Main Menu ────────────────────────────────────────────── */
+.menu-wrap {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.logo {
+  font-size: 3rem;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  margin-bottom: 0.3rem;
+}
+
+.logo-sub {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-bottom: 2.2rem;
+}
+
+.game-grid {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.game-card {
+  background: var(--card-bg);
+  border: 1px solid #2a3a50;
+  border-radius: var(--radius);
+  padding: 1.5rem 1.3rem 1.2rem;
+  width: 210px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+.game-card:hover { border-color: #4a6a8a; }
+
+.game-card-badge {
+  display: inline-block;
+  background: #111c2a;
+  border: 1px solid #2a4a6a;
+  border-radius: 50px;
+  padding: 0.2rem 0.8rem;
+  font-size: 0.72rem;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.7rem;
+}
+
+.game-card-title {
+  font-size: 1.25rem;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.game-card-desc {
+  font-size: 0.83rem;
+  color: var(--muted);
+  line-height: 1.55;
+  margin-bottom: 1.1rem;
+}
+
+/* ── Ghost Button ─────────────────────────────────────────── */
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-top: 0.3rem;
+  width: 100%;
+  transition: color 0.15s;
+}
+.btn-ghost:hover { color: var(--text); }
+
+/* ── Blackjack Table ──────────────────────────────────────── */
+.bj-table {
+  padding: 1.2rem 1.2rem 1rem;
+}
+
+.bj-zone {
+  margin-bottom: 0.6rem;
+}
+
+.zone-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 0.5rem;
+}
+
+.hand-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+  min-height: 84px;
+  align-items: center;
+}
+
+/* ── Playing Cards ────────────────────────────────────────── */
+.playing-card {
+  width: 52px;
+  height: 76px;
+  background: #fff;
+  border-radius: 7px;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 4px 5px;
+  color: #111;
+  user-select: none;
+  animation: cardDeal 0.18s ease;
+}
+
+@keyframes cardDeal {
+  from { transform: scale(0.7) translateY(-10px); opacity: 0; }
+  to   { transform: scale(1) translateY(0);       opacity: 1; }
+}
+
+.card-rank { font-size: 1rem; font-weight: 800; line-height: 1; }
+.card-suit { font-size: 0.95rem; line-height: 1; align-self: flex-end; }
+
+.playing-card.red .card-rank,
+.playing-card.red .card-suit { color: #c0392b; }
+
+.playing-card.face-down {
+  background: repeating-linear-gradient(
+    135deg,
+    #1a3d6c,
+    #1a3d6c 4px,
+    #1b4880 4px,
+    #1b4880 8px
+  );
+  border-color: #0d2a50;
+}
+
+/* ── BJ Result ────────────────────────────────────────────── */
+.bj-result {
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+  min-height: 1.8rem;
+  margin: 0.4rem 0;
+}
+.bj-result.win  { color: var(--win); }
+.bj-result.lose { color: var(--lose); }
+.bj-result.push { color: var(--muted); }
+
+/* ── BJ Action Buttons ────────────────────────────────────── */
+.bj-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.btn-action {
+  flex: 1;
+  padding: 0.65rem 0.4rem;
+  background: var(--btn-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-action:hover:not(:disabled) { background: var(--btn-hover); transform: translateY(-1px); }
+.btn-action:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+.btn-action-gold {
+  background: #5c3d00;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+}
+.btn-action-gold:hover:not(:disabled) { background: #7a5200; }
+
+/* ── BJ After Panel ───────────────────────────────────────── */
+.bj-after {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: 0.6rem;
+}
+
+/* ── Custom number input for BJ ───────────────────────────── */
+#bj-bet-input {
+  width: 80px;
+  padding: 0.35rem 0.6rem;
+  background: #111c2a;
+  border: 1px solid #2a3a50;
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.9rem;
+  text-align: center;
+}
+#bj-bet-input:focus { outline: none; border-color: var(--gold); }

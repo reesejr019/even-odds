@@ -8,8 +8,30 @@
 </head>
 <body>
 
-  <!-- START SCREEN -->
-  <div id="screen-start" class="screen active">
+  <!-- ── MAIN MENU ─────────────────────────────────────────── -->
+  <div id="screen-menu" class="screen active">
+    <div class="menu-wrap">
+      <h1 class="logo">Even Odds</h1>
+      <p class="logo-sub">Choose your game</p>
+      <div class="game-grid">
+        <div class="game-card">
+          <div class="game-card-badge">Dice</div>
+          <h2 class="game-card-title">Even or Odd</h2>
+          <p class="game-card-desc">Bet on dice rolls across five rounds. Even wins, odd loses.</p>
+          <button class="btn-primary" id="menu-btn-dice">Play</button>
+        </div>
+        <div class="game-card">
+          <div class="game-card-badge">Cards</div>
+          <h2 class="game-card-title">Blackjack</h2>
+          <p class="game-card-desc">Beat the dealer to 21 without going bust. Classic rules.</p>
+          <button class="btn-primary" id="menu-btn-bj">Play</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DICE: START ───────────────────────────────────────── -->
+  <div id="screen-start" class="screen">
     <div class="card">
       <h1>Even Odds</h1>
       <p class="subtitle">A dice game about risk and consequence.</p>
@@ -21,10 +43,11 @@
         The game ends after <strong>5 rounds</strong> or when you're broke.
       </p>
       <button id="btn-start" class="btn-primary">Start Game</button>
+      <button class="btn-ghost" id="dice-back-to-menu">Back to Menu</button>
     </div>
   </div>
 
-  <!-- GAME SCREEN -->
+  <!-- ── DICE: GAME ────────────────────────────────────────── -->
   <div id="screen-game" class="screen">
     <div class="hud">
       <div class="hud-item">
@@ -38,7 +61,6 @@
     </div>
 
     <div class="table">
-      <!-- Dice area -->
       <div id="dice-area" class="dice-area">
         <div class="die" id="die1">?</div>
         <div class="die" id="die2">?</div>
@@ -46,7 +68,6 @@
 
       <div id="roll-result" class="roll-result"></div>
 
-      <!-- Betting controls -->
       <div id="betting-area" class="betting-area">
         <p class="bet-prompt">Place your bet:</p>
         <div class="bet-chips">
@@ -62,7 +83,6 @@
         </div>
         <p class="bet-selected">Bet: <span id="bet-display">—</span></p>
 
-        <!-- Double-or-nothing (shown only on round 5) -->
         <div id="double-option" class="double-option hidden">
           <p class="double-label">Final round — go <strong>double or nothing</strong>?</p>
           <label class="toggle-label">
@@ -74,12 +94,11 @@
         <button id="btn-roll" class="btn-primary" disabled>Roll Dice</button>
       </div>
 
-      <!-- Continue button (shown after result) -->
       <button id="btn-next" class="btn-secondary hidden">Next Round</button>
     </div>
   </div>
 
-  <!-- SUMMARY SCREEN -->
+  <!-- ── DICE: SUMMARY ─────────────────────────────────────── -->
   <div id="screen-summary" class="screen">
     <div class="card">
       <h2 id="summary-title">Game Over</h2>
@@ -100,9 +119,74 @@
       </div>
       <div id="round-history" class="round-history"></div>
       <button id="btn-restart" class="btn-primary">Play Again</button>
+      <button class="btn-ghost" id="dice-summary-back-to-menu">Back to Menu</button>
+    </div>
+  </div>
+
+  <!-- ── BLACKJACK ─────────────────────────────────────────── -->
+  <div id="screen-bj" class="screen">
+    <div class="hud">
+      <div class="hud-item">
+        <span class="hud-label">Balance</span>
+        <span id="bj-balance" class="hud-value">100</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Hands</span>
+        <span id="bj-hands-played" class="hud-value">0</span>
+      </div>
+    </div>
+
+    <div class="table bj-table">
+      <!-- Dealer zone -->
+      <div class="bj-zone">
+        <p class="zone-label" id="bj-dealer-label">Dealer</p>
+        <div class="hand-cards" id="bj-dealer-cards"></div>
+      </div>
+
+      <!-- Result message -->
+      <div id="bj-result" class="bj-result"></div>
+
+      <!-- Player zone -->
+      <div class="bj-zone">
+        <p class="zone-label" id="bj-player-label">You</p>
+        <div class="hand-cards" id="bj-player-cards"></div>
+      </div>
+
+      <!-- Betting panel -->
+      <div id="bj-betting-panel" class="betting-area">
+        <p class="bet-prompt">Place your bet:</p>
+        <div class="bet-chips">
+          <button class="chip bj-chip" data-amount="5">5</button>
+          <button class="chip bj-chip" data-amount="10">10</button>
+          <button class="chip bj-chip" data-amount="25">25</button>
+          <button class="chip bj-chip" data-amount="50">50</button>
+          <button class="chip chip-all bj-chip" data-amount="all">ALL IN</button>
+        </div>
+        <div class="bet-input-row">
+          <label for="bj-bet-input">Custom:</label>
+          <input id="bj-bet-input" type="number" min="1" placeholder="0" />
+        </div>
+        <p class="bet-selected">Bet: <span id="bj-bet-display">—</span></p>
+        <button id="bj-btn-deal" class="btn-primary" disabled>Deal</button>
+        <button class="btn-ghost" id="bj-btn-menu-bet">Back to Menu</button>
+      </div>
+
+      <!-- Action panel (shown during player's turn) -->
+      <div id="bj-action-panel" class="bj-actions hidden">
+        <button id="bj-btn-hit" class="btn-action">Hit</button>
+        <button id="bj-btn-stand" class="btn-action">Stand</button>
+        <button id="bj-btn-double" class="btn-action btn-action-gold">Double Down</button>
+      </div>
+
+      <!-- After-hand panel -->
+      <div id="bj-after-panel" class="bj-after hidden">
+        <button id="bj-btn-next-hand" class="btn-secondary">Next Hand</button>
+        <button class="btn-ghost" id="bj-btn-menu-after">Back to Menu</button>
+      </div>
     </div>
   </div>
 
   <script src="game.js"></script>
+  <script src="blackjack.js"></script>
 </body>
 </html>

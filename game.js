@@ -1,3 +1,10 @@
+// ── Shared Navigation ─────────────────────────────────────────
+// Used by both game.js and blackjack.js
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
 // ── Game State ────────────────────────────────────────────────
 const STARTING_BALANCE = 100;
 const TOTAL_ROUNDS = 5;
@@ -6,17 +13,11 @@ let state = {
   balance: STARTING_BALANCE,
   round: 1,
   currentBet: 0,
-  history: [],   // { round, die1, die2, total, bet, won, balanceAfter }
+  history: [],
   doubleOrNothing: false,
 };
 
 // ── DOM References ────────────────────────────────────────────
-const screens = {
-  start:   document.getElementById('screen-start'),
-  game:    document.getElementById('screen-game'),
-  summary: document.getElementById('screen-summary'),
-};
-
 const el = {
   balance:      document.getElementById('balance'),
   roundDisplay: document.getElementById('round-display'),
@@ -30,7 +31,7 @@ const el = {
   btnNext:      document.getElementById('btn-next'),
   doubleOption: document.getElementById('double-option'),
   doubleToggle: document.getElementById('double-toggle'),
-  chips:        document.querySelectorAll('.chip'),
+  chips:        document.querySelectorAll('#screen-game .chip, #screen-start .chip'),
 
   // Summary
   summaryTitle:  document.getElementById('summary-title'),
@@ -40,11 +41,8 @@ const el = {
   roundHistory:  document.getElementById('round-history'),
 };
 
-// ── Screen Management ─────────────────────────────────────────
-function showScreen(name) {
-  Object.values(screens).forEach(s => s.classList.remove('active'));
-  screens[name].classList.add('active');
-}
+// Chips scoped to the dice betting area only
+const diceChips = document.querySelectorAll('#betting-area .chip');
 
 // ── HUD Update ────────────────────────────────────────────────
 function updateHUD() {
@@ -62,15 +60,13 @@ function setBet(amount) {
   el.betDisplay.textContent = bet;
   el.btnRoll.disabled = false;
 
-  // Update chip selection highlight
-  el.chips.forEach(chip => {
+  diceChips.forEach(chip => {
     const val = chip.dataset.amount;
     chip.classList.toggle('selected',
       val === 'all' ? amount === 'all' : parseInt(val, 10) === bet
     );
   });
 
-  // Sync custom input
   el.betInput.value = bet;
 }
 
@@ -78,7 +74,7 @@ function clearBet() {
   state.currentBet = 0;
   el.betDisplay.textContent = '—';
   el.btnRoll.disabled = true;
-  el.chips.forEach(c => c.classList.remove('selected'));
+  diceChips.forEach(c => c.classList.remove('selected'));
   el.betInput.value = '';
 }
 
@@ -136,7 +132,6 @@ function resolveRound(d1, d2) {
 
 // ── Roll Button Handler ───────────────────────────────────────
 function handleRoll() {
-  // Lock UI during animation
   el.bettingArea.classList.add('hidden');
   el.btnRoll.disabled = true;
   el.rollResult.textContent = '';
@@ -150,7 +145,6 @@ function handleRoll() {
 
     const { total, isEven, change } = resolveRound(d1, d2);
 
-    // Show result
     el.rollResult.textContent = isEven
       ? `Total: ${total} — EVEN! +${Math.abs(change)} credits`
       : `Total: ${total} — ODD! −${Math.abs(change)} credits`;
@@ -158,17 +152,11 @@ function handleRoll() {
 
     updateHUD();
 
-    // Decide what comes next
     const isLastRound = state.round >= TOTAL_ROUNDS;
     const broke = state.balance === 0;
 
-    if (isLastRound || broke) {
-      el.btnNext.textContent = 'See Summary';
-      el.btnNext.classList.remove('hidden');
-    } else {
-      el.btnNext.textContent = 'Next Round';
-      el.btnNext.classList.remove('hidden');
-    }
+    el.btnNext.textContent = (isLastRound || broke) ? 'See Summary' : 'Next Round';
+    el.btnNext.classList.remove('hidden');
   });
 }
 
@@ -194,13 +182,7 @@ function handleNext() {
   el.doubleToggle.checked = false;
   updateHUD();
 
-  // Show double-or-nothing toggle on final round
-  if (state.round === TOTAL_ROUNDS) {
-    el.doubleOption.classList.remove('hidden');
-  } else {
-    el.doubleOption.classList.add('hidden');
-  }
-
+  el.doubleOption.classList.toggle('hidden', state.round !== TOTAL_ROUNDS);
   el.bettingArea.classList.remove('hidden');
 }
 
@@ -214,8 +196,8 @@ function showSummary() {
   el.summaryVerdict.textContent = broke
     ? 'You ran out of credits. It happens faster than you think.'
     : won
-    ? `You came out ahead. Lucky — or disciplined?`
-    : `You finished in the red. Would you try again?`;
+    ? 'You came out ahead. Lucky — or disciplined?'
+    : 'You finished in the red. Would you try again?';
 
   el.finalBalance.textContent = `${state.balance} credits`;
   el.finalBalance.className = `stat-value ${state.balance >= STARTING_BALANCE ? 'positive' : 'negative'}`;
@@ -223,7 +205,6 @@ function showSummary() {
   el.netResult.textContent = `${net >= 0 ? '+' : ''}${net} credits`;
   el.netResult.className = `stat-value ${net >= 0 ? 'positive' : 'negative'}`;
 
-  // Round history
   el.roundHistory.innerHTML = '<h3>Round History</h3>';
   state.history.forEach(h => {
     const row = document.createElement('div');
@@ -236,7 +217,7 @@ function showSummary() {
     el.roundHistory.appendChild(row);
   });
 
-  showScreen('summary');
+  showScreen('screen-summary');
 }
 
 // ── Reset / Restart ───────────────────────────────────────────
@@ -260,27 +241,37 @@ function resetGame() {
   el.bettingArea.classList.remove('hidden');
 
   updateHUD();
-  showScreen('game');
+  showScreen('screen-game');
 }
 
 // ── Event Listeners ───────────────────────────────────────────
+document.getElementById('menu-btn-dice').addEventListener('click', () => {
+  showScreen('screen-start');
+});
+
 document.getElementById('btn-start').addEventListener('click', () => {
   resetGame();
+});
+
+document.getElementById('dice-back-to-menu').addEventListener('click', () => {
+  showScreen('screen-menu');
 });
 
 document.getElementById('btn-restart').addEventListener('click', () => {
   resetGame();
 });
 
+document.getElementById('dice-summary-back-to-menu').addEventListener('click', () => {
+  showScreen('screen-menu');
+});
+
 el.btnRoll.addEventListener('click', handleRoll);
 el.btnNext.addEventListener('click', handleNext);
 
-// Chip buttons
-el.chips.forEach(chip => {
+diceChips.forEach(chip => {
   chip.addEventListener('click', () => setBet(chip.dataset.amount));
 });
 
-// Custom input
 el.betInput.addEventListener('input', () => {
   const val = parseInt(el.betInput.value, 10);
   if (!isNaN(val) && val >= 1) {
@@ -290,7 +281,6 @@ el.betInput.addEventListener('input', () => {
   }
 });
 
-// Double-or-nothing toggle
 el.doubleToggle.addEventListener('change', () => {
   state.doubleOrNothing = el.doubleToggle.checked;
 });

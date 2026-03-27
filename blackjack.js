@@ -1,0 +1,363 @@
+// ── Constants ─────────────────────────────────────────────────
+const BJ_STARTING = 100;
+const SUITS = ['♠', '♥', '♦', '♣'];
+const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const RED_SUITS = new Set(['♥', '♦']);
+
+// ── State ─────────────────────────────────────────────────────
+let bj = {};
+
+// ── DOM References ────────────────────────────────────────────
+const bjEl = {
+  balance:      document.getElementById('bj-balance'),
+  handsPlayed:  document.getElementById('bj-hands-played'),
+  dealerLabel:  document.getElementById('bj-dealer-label'),
+  playerLabel:  document.getElementById('bj-player-label'),
+  dealerCards:  document.getElementById('bj-dealer-cards'),
+  playerCards:  document.getElementById('bj-player-cards'),
+  result:       document.getElementById('bj-result'),
+
+  bettingPanel: document.getElementById('bj-betting-panel'),
+  actionPanel:  document.getElementById('bj-action-panel'),
+  afterPanel:   document.getElementById('bj-after-panel'),
+
+  chips:        document.querySelectorAll('.bj-chip'),
+  betInput:     document.getElementById('bj-bet-input'),
+  betDisplay:   document.getElementById('bj-bet-display'),
+  btnDeal:      document.getElementById('bj-btn-deal'),
+
+  btnHit:       document.getElementById('bj-btn-hit'),
+  btnStand:     document.getElementById('bj-btn-stand'),
+  btnDouble:    document.getElementById('bj-btn-double'),
+
+  btnNextHand:  document.getElementById('bj-btn-next-hand'),
+};
+
+// ── Deck Utilities ────────────────────────────────────────────
+function buildDeck(numDecks = 6) {
+  const deck = [];
+  for (let d = 0; d < numDecks; d++) {
+    for (const suit of SUITS) {
+      for (const rank of RANKS) {
+        deck.push({ suit, rank });
+      }
+    }
+  }
+  return deck;
+}
+
+function shuffle(deck) {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  return deck;
+}
+
+function dealCard() {
+  if (bj.deck.length < 15) bj.deck = shuffle(buildDeck(6));
+  return bj.deck.pop();
+}
+
+// ── Hand Math ─────────────────────────────────────────────────
+function cardValue(rank) {
+  if (rank === 'A') return 11;
+  if (['J', 'Q', 'K'].includes(rank)) return 10;
+  return parseInt(rank, 10);
+}
+
+function handTotal(hand) {
+  let total = 0;
+  let aces = 0;
+  for (const card of hand) {
+    total += cardValue(card.rank);
+    if (card.rank === 'A') aces++;
+  }
+  while (total > 21 && aces > 0) { total -= 10; aces--; }
+  return total;
+}
+
+function isBlackjack(hand) {
+  return hand.length === 2 && handTotal(hand) === 21;
+}
+
+// ── Rendering ─────────────────────────────────────────────────
+function makeCardEl(card, faceDown = false) {
+  const div = document.createElement('div');
+  if (faceDown) {
+    div.className = 'playing-card face-down';
+  } else {
+    div.className = `playing-card${RED_SUITS.has(card.suit) ? ' red' : ''}`;
+    div.innerHTML = `<span class="card-rank">${card.rank}</span><span class="card-suit">${card.suit}</span>`;
+  }
+  return div;
+}
+
+function renderHands(dealerHidden) {
+  // Dealer
+  bjEl.dealerCards.innerHTML = '';
+  bj.dealer.forEach((card, i) => {
+    bjEl.dealerCards.appendChild(makeCardEl(card, dealerHidden && i === 0));
+  });
+  bjEl.dealerLabel.textContent = dealerHidden
+    ? 'Dealer — ?'
+    : `Dealer — ${handTotal(bj.dealer)}`;
+
+  // Player
+  bjEl.playerCards.innerHTML = '';
+  bj.player.forEach(card => bjEl.playerCards.appendChild(makeCardEl(card)));
+  bjEl.playerLabel.textContent = `You — ${handTotal(bj.player)}`;
+}
+
+function updateBjHUD() {
+  bjEl.balance.textContent = bj.balance;
+  bjEl.handsPlayed.textContent = bj.handsPlayed;
+}
+
+// ── Panel Management ──────────────────────────────────────────
+function showPanel(which) {
+  bjEl.bettingPanel.classList.toggle('hidden', which !== 'betting');
+  bjEl.actionPanel.classList.toggle('hidden', which !== 'action');
+  bjEl.afterPanel.classList.toggle('hidden', which !== 'after');
+}
+
+// ── Bet Handling ──────────────────────────────────────────────
+function bjSetBet(amount) {
+  const max = bj.balance;
+  const bet = (amount === 'all') ? max : Math.min(parseInt(amount, 10), max);
+  if (isNaN(bet) || bet < 1) return;
+
+  bj.bet = bet;
+  bjEl.betDisplay.textContent = bet;
+  bjEl.btnDeal.disabled = false;
+
+  bjEl.chips.forEach(chip => {
+    const val = chip.dataset.amount;
+    chip.classList.toggle('selected',
+      val === 'all' ? amount === 'all' : parseInt(val, 10) === bet
+    );
+  });
+
+  bjEl.betInput.value = bet;
+}
+
+function bjClearBet() {
+  bj.bet = 0;
+  bjEl.betDisplay.textContent = '—';
+  bjEl.btnDeal.disabled = true;
+  bjEl.chips.forEach(c => c.classList.remove('selected'));
+  bjEl.betInput.value = '';
+}
+
+// ── Deal ──────────────────────────────────────────────────────
+function bjDeal() {
+  bj.originalBet = bj.bet;
+  bj.balanceBefore = bj.balance;
+  bj.balance -= bj.bet;
+  bj.doubled = false;
+  bj.handsPlayed++;
+
+  bj.player = [dealCard(), dealCard()];
+  bj.dealer = [dealCard(), dealCard()];
+
+  updateBjHUD();
+  renderHands(true);
+
+  bjEl.result.textContent = '';
+  bjEl.result.className = 'bj-result';
+
+  // Check immediate blackjack on either side
+  if (isBlackjack(bj.player) || isBlackjack(bj.dealer)) {
+    showPanel('action'); // briefly show action panel while endHand runs
+    endHand();
+    return;
+  }
+
+  // Disable double if player can't afford the extra bet
+  bjEl.btnDouble.disabled = bj.balance < bj.originalBet;
+  showPanel('action');
+}
+
+// ── Player Actions ────────────────────────────────────────────
+function bjHit() {
+  setActionButtons(false);
+  bj.player.push(dealCard());
+  renderHands(true);
+
+  if (handTotal(bj.player) >= 21) {
+    endHand();
+  } else {
+    setActionButtons(true);
+    bjEl.btnDouble.disabled = true; // can only double on first two cards
+  }
+}
+
+function bjStand() {
+  setActionButtons(false);
+  endHand();
+}
+
+function bjDouble() {
+  bj.balance -= bj.originalBet;
+  bj.bet = bj.originalBet * 2;
+  bj.doubled = true;
+  updateBjHUD();
+  setActionButtons(false);
+
+  bj.player.push(dealCard());
+  renderHands(true);
+  endHand();
+}
+
+function setActionButtons(enabled) {
+  bjEl.btnHit.disabled    = !enabled;
+  bjEl.btnStand.disabled  = !enabled;
+  bjEl.btnDouble.disabled = !enabled;
+}
+
+// ── Dealer Draw ───────────────────────────────────────────────
+function delay(ms) {
+  return new Promise(res => setTimeout(res, ms));
+}
+
+async function dealerDraw() {
+  while (handTotal(bj.dealer) < 17) {
+    await delay(650);
+    bj.dealer.push(dealCard());
+    renderHands(false);
+  }
+}
+
+// ── End of Hand ───────────────────────────────────────────────
+async function endHand() {
+  const playerTotal = handTotal(bj.player);
+  const playerBJ    = isBlackjack(bj.player);
+  const dealerBJ    = isBlackjack(bj.dealer);
+
+  // Reveal dealer's hole card
+  renderHands(false);
+
+  // Dealer draws only if player is still alive and didn't get blackjack
+  if (playerTotal <= 21 && !playerBJ) {
+    await dealerDraw();
+  }
+
+  const dealerTotal = handTotal(bj.dealer);
+
+  // Determine outcome & payout
+  // Note: bj.balance was already reduced by bj.bet (total wagered incl. double).
+  let payout = 0;
+  let outcomeText = '';
+  let outcomeClass = '';
+
+  if (playerBJ && dealerBJ) {
+    outcomeText  = 'Both Blackjack — Push.';
+    outcomeClass = 'push';
+    payout = bj.bet;
+  } else if (playerBJ) {
+    const bonus  = Math.floor(bj.bet * 1.5);
+    outcomeText  = `Blackjack! +${bonus} credits`;
+    outcomeClass = 'win';
+    payout = bj.bet + bonus;
+  } else if (playerTotal > 21) {
+    outcomeText  = `Bust! −${bj.bet} credits`;
+    outcomeClass = 'lose';
+    payout = 0;
+  } else if (dealerTotal > 21) {
+    outcomeText  = `Dealer busts! +${bj.bet} credits`;
+    outcomeClass = 'win';
+    payout = bj.bet * 2;
+  } else if (playerTotal > dealerTotal) {
+    outcomeText  = `You win! +${bj.bet} credits`;
+    outcomeClass = 'win';
+    payout = bj.bet * 2;
+  } else if (playerTotal < dealerTotal) {
+    outcomeText  = `Dealer wins. −${bj.bet} credits`;
+    outcomeClass = 'lose';
+    payout = 0;
+  } else {
+    outcomeText  = 'Push — bet returned.';
+    outcomeClass = 'push';
+    payout = bj.bet;
+  }
+
+  bj.balance += payout;
+  updateBjHUD();
+
+  bjEl.result.textContent = outcomeText;
+  bjEl.result.className   = `bj-result ${outcomeClass}`;
+
+  // If broke, disable Next Hand
+  const broke = bj.balance === 0;
+  bjEl.btnNextHand.disabled    = broke;
+  bjEl.btnNextHand.textContent = broke ? 'Out of Credits' : 'Next Hand';
+
+  showPanel('after');
+}
+
+// ── Init / Reset ──────────────────────────────────────────────
+function bjInit() {
+  bj = {
+    balance: BJ_STARTING,
+    bet: 0,
+    originalBet: 0,
+    balanceBefore: 0,
+    doubled: false,
+    deck: shuffle(buildDeck(6)),
+    player: [],
+    dealer: [],
+    handsPlayed: 0,
+  };
+
+  bjEl.dealerCards.innerHTML = '';
+  bjEl.playerCards.innerHTML = '';
+  bjEl.dealerLabel.textContent = 'Dealer';
+  bjEl.playerLabel.textContent = 'You';
+  bjEl.result.textContent = '';
+  bjEl.result.className = 'bj-result';
+
+  bjClearBet();
+  updateBjHUD();
+  showPanel('betting');
+  showScreen('screen-bj');
+}
+
+function bjNextHand() {
+  // Reset bet if it exceeds current balance
+  if (bj.bet > bj.balance) bjClearBet();
+
+  bjEl.dealerCards.innerHTML = '';
+  bjEl.playerCards.innerHTML = '';
+  bjEl.dealerLabel.textContent = 'Dealer';
+  bjEl.playerLabel.textContent = 'You';
+  bjEl.result.textContent = '';
+  bjEl.result.className = 'bj-result';
+
+  showPanel('betting');
+}
+
+// ── Event Listeners ───────────────────────────────────────────
+document.getElementById('menu-btn-bj').addEventListener('click', bjInit);
+
+bjEl.chips.forEach(chip => {
+  chip.addEventListener('click', () => bjSetBet(chip.dataset.amount));
+});
+
+bjEl.betInput.addEventListener('input', () => {
+  const val = parseInt(bjEl.betInput.value, 10);
+  if (!isNaN(val) && val >= 1) {
+    bjSetBet(val);
+  } else if (bjEl.betInput.value === '') {
+    bjClearBet();
+  }
+});
+
+bjEl.btnDeal.addEventListener('click', bjDeal);
+bjEl.btnHit.addEventListener('click', bjHit);
+bjEl.btnStand.addEventListener('click', bjStand);
+bjEl.btnDouble.addEventListener('click', bjDouble);
+
+bjEl.btnNextHand.addEventListener('click', bjNextHand);
+
+document.getElementById('bj-btn-menu-bet').addEventListener('click', () => showScreen('screen-menu'));
+document.getElementById('bj-btn-menu-after').addEventListener('click', () => showScreen('screen-menu'));
