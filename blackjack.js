@@ -254,6 +254,9 @@ async function dealerDraw() {
 
 // ── End of Hand ───────────────────────────────────────────────
 async function endHand() {
+  // Hide all panels immediately so nothing is clickable during resolution
+  showPanel('none');
+
   const playerTotal = handTotal(bj.player);
   const playerBJ    = isBlackjack(bj.player);
   const dealerBJ    = isBlackjack(bj.dealer);
