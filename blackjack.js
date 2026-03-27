@@ -166,14 +166,14 @@ function bjDeal() {
   bjEl.result.textContent = '';
   bjEl.result.className = 'bj-result';
 
-  // Check immediate blackjack on either side
+  // Check immediate blackjack on either side — skip player turn entirely
   if (isBlackjack(bj.player) || isBlackjack(bj.dealer)) {
-    showPanel('action'); // briefly show action panel while endHand runs
     endHand();
     return;
   }
 
-  // Disable double if player can't afford the extra bet
+  // Re-enable Hit/Stand for this hand, then conditionally disable Double
+  setActionButtons(true);
   bjEl.btnDouble.disabled = bj.balance < bj.originalBet;
   showPanel('action');
 }
