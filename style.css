@@ -317,6 +317,14 @@ h2 { font-size: 2rem; color: var(--gold); margin-bottom: 0.75rem; }
 }
 .history-row.win-row  { background: #0e2e1a; color: var(--win); }
 .history-row.lose-row { background: #2e0e0e; color: var(--lose); }
+.history-row.push-row { background: #1a1f2a; color: var(--muted); }
+
+.bj-hand-history {
+  max-height: 220px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #2a3a50 transparent;
+}
 
 /* ── Utility ──────────────────────────────────────────────── */
 .hidden { display: none !important; }

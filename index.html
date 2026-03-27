@@ -186,6 +186,35 @@
     </div>
   </div>
 
+  <!-- ── BLACKJACK: SUMMARY ────────────────────────────────── -->
+  <div id="screen-bj-summary" class="screen">
+    <div class="card">
+      <h2 id="bj-summary-title">Session Over</h2>
+      <p id="bj-summary-verdict" class="verdict"></p>
+      <div class="summary-stats">
+        <div class="stat">
+          <span class="stat-label">Started with</span>
+          <span class="stat-value">100 credits</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Ended with</span>
+          <span id="bj-final-balance" class="stat-value">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Net result</span>
+          <span id="bj-net-result" class="stat-value">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Hands played</span>
+          <span id="bj-summary-hands" class="stat-value">—</span>
+        </div>
+      </div>
+      <div id="bj-hand-history" class="round-history bj-hand-history"></div>
+      <button id="bj-btn-play-again" class="btn-primary">Play Again</button>
+      <button id="bj-btn-summary-menu" class="btn-ghost">Back to Menu</button>
+    </div>
+  </div>
+
   <script src="game.js"></script>
   <script src="blackjack.js"></script>
 </body>

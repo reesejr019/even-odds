@@ -31,6 +31,14 @@ const bjEl = {
   btnDouble:    document.getElementById('bj-btn-double'),
 
   btnNextHand:  document.getElementById('bj-btn-next-hand'),
+
+  // Summary
+  summaryTitle:   document.getElementById('bj-summary-title'),
+  summaryVerdict: document.getElementById('bj-summary-verdict'),
+  finalBalance:   document.getElementById('bj-final-balance'),
+  netResult:      document.getElementById('bj-net-result'),
+  summaryHands:   document.getElementById('bj-summary-hands'),
+  handHistory:    document.getElementById('bj-hand-history'),
 };
 
 // ── Deck Utilities ────────────────────────────────────────────
@@ -300,15 +308,59 @@ async function endHand() {
   bj.balance += payout;
   updateBjHUD();
 
+  bj.history.push({
+    hand:         bj.handsPlayed,
+    bet:          bj.bet,
+    playerTotal,
+    dealerTotal,
+    outcomeText,
+    outcomeClass,
+    balanceAfter: bj.balance,
+  });
+
   bjEl.result.textContent = outcomeText;
   bjEl.result.className   = `bj-result ${outcomeClass}`;
 
-  // If broke, disable Next Hand
-  const broke = bj.balance === 0;
-  bjEl.btnNextHand.disabled    = broke;
-  bjEl.btnNextHand.textContent = broke ? 'Out of Credits' : 'Next Hand';
+  // If broke, go straight to summary after a short pause so the result is visible
+  if (bj.balance === 0) {
+    await delay(1400);
+    showBjSummary();
+    return;
+  }
 
   showPanel('after');
+}
+
+// ── Summary Screen ────────────────────────────────────────────
+function showBjSummary() {
+  const net   = bj.balance - BJ_STARTING;
+  const broke = bj.balance === 0;
+  const won   = net > 0;
+
+  bjEl.summaryTitle.textContent = broke ? 'Busted' : won ? 'You Profited' : 'You Lost';
+  bjEl.summaryVerdict.textContent = broke
+    ? 'You ran out of credits. It happens faster than you think.'
+    : won
+    ? 'You came out ahead. Lucky — or disciplined?'
+    : 'You finished in the red. Would you try again?';
+
+  bjEl.finalBalance.textContent = `${bj.balance} credits`;
+  bjEl.finalBalance.className   = `stat-value ${bj.balance >= BJ_STARTING ? 'positive' : 'negative'}`;
+
+  bjEl.netResult.textContent = `${net >= 0 ? '+' : ''}${net} credits`;
+  bjEl.netResult.className   = `stat-value ${net >= 0 ? 'positive' : 'negative'}`;
+
+  bjEl.summaryHands.textContent = bj.handsPlayed;
+
+  bjEl.handHistory.innerHTML = '<h3>Hand History</h3>';
+  bj.history.forEach(h => {
+    const row = document.createElement('div');
+    row.className = `history-row ${h.outcomeClass === 'win' ? 'win-row' : h.outcomeClass === 'lose' ? 'lose-row' : 'push-row'}`;
+    row.innerHTML = `<span>Hand ${h.hand} — ${h.outcomeText}</span><span>→ ${h.balanceAfter}</span>`;
+    bjEl.handHistory.appendChild(row);
+  });
+
+  showScreen('screen-bj-summary');
 }
 
 // ── Init / Reset ──────────────────────────────────────────────
@@ -323,6 +375,7 @@ function bjInit() {
     player: [],
     dealer: [],
     handsPlayed: 0,
+    history: [],
   };
 
   bjEl.dealerCards.innerHTML = '';
@@ -376,4 +429,6 @@ bjEl.btnDouble.addEventListener('click', bjDouble);
 bjEl.btnNextHand.addEventListener('click', bjNextHand);
 
 document.getElementById('bj-btn-menu-bet').addEventListener('click', () => showScreen('screen-menu'));
-document.getElementById('bj-btn-menu-after').addEventListener('click', () => showScreen('screen-menu'));
+document.getElementById('bj-btn-menu-after').addEventListener('click', showBjSummary);
+document.getElementById('bj-btn-play-again').addEventListener('click', bjInit);
+document.getElementById('bj-btn-summary-menu').addEventListener('click', () => showScreen('screen-menu'));
